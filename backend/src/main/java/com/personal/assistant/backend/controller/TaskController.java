@@ -32,6 +32,7 @@ public class TaskController {
         task.setCompleted(taskDetails.isCompleted());
         task.setDueDate(taskDetails.getDueDate());
         task.setPriority(taskDetails.getPriority());
+        task.setDescription(taskDetails.getDescription());
         task.setSubTasks(taskDetails.getSubTasks());
         return taskRepository.save(task);
     }

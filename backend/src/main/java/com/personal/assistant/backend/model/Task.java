@@ -13,6 +13,27 @@ public class Task {
     private boolean completed;
     private java.util.Date dueDate;
     private Priority priority;
+    private String description;
+
+    // Task Type
+    private String taskType; // "MANUAL", "LEARNING", "LOAN"
+
+    // Learning Goal fields
+    private Integer totalVideos;
+    private Integer completedVideos;
+
+    // Loan/EMI fields
+    private Double loanAmount;
+    private Double loanOutstanding;
+    private Double loanInterestRate;
+    private Double loanEmi;
+
+    // Meeting fields
+    private java.util.Date meetingStartTime;
+    private java.util.Date meetingEndTime;
+    private String meetingInfo;
+    private String meetingLink;
+
     private List<SubTask> subTasks = new ArrayList<>();
 
     public enum Priority {
@@ -101,11 +122,107 @@ public class Task {
         this.priority = priority;
     }
 
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
     public List<SubTask> getSubTasks() {
         return subTasks;
     }
 
     public void setSubTasks(List<SubTask> subTasks) {
         this.subTasks = subTasks;
+    }
+
+    public String getTaskType() {
+        return taskType;
+    }
+
+    public void setTaskType(String taskType) {
+        this.taskType = taskType;
+    }
+
+    public Integer getTotalVideos() {
+        return totalVideos;
+    }
+
+    public void setTotalVideos(Integer totalVideos) {
+        this.totalVideos = totalVideos;
+    }
+
+    public Integer getCompletedVideos() {
+        return completedVideos;
+    }
+
+    public void setCompletedVideos(Integer completedVideos) {
+        this.completedVideos = completedVideos;
+    }
+
+    public Double getLoanAmount() {
+        return loanAmount;
+    }
+
+    public void setLoanAmount(Double loanAmount) {
+        this.loanAmount = loanAmount;
+    }
+
+    public Double getLoanOutstanding() {
+        return loanOutstanding;
+    }
+
+    public void setLoanOutstanding(Double loanOutstanding) {
+        this.loanOutstanding = loanOutstanding;
+    }
+
+    public Double getLoanInterestRate() {
+        return loanInterestRate;
+    }
+
+    public void setLoanInterestRate(Double loanInterestRate) {
+        this.loanInterestRate = loanInterestRate;
+    }
+
+    public Double getLoanEmi() {
+        return loanEmi;
+    }
+
+    public void setLoanEmi(Double loanEmi) {
+        this.loanEmi = loanEmi;
+    }
+
+    public java.util.Date getMeetingStartTime() {
+        return meetingStartTime;
+    }
+
+    public void setMeetingStartTime(java.util.Date meetingStartTime) {
+        this.meetingStartTime = meetingStartTime;
+    }
+
+    public java.util.Date getMeetingEndTime() {
+        return meetingEndTime;
+    }
+
+    public void setMeetingEndTime(java.util.Date meetingEndTime) {
+        this.meetingEndTime = meetingEndTime;
+    }
+
+    public String getMeetingInfo() {
+        return meetingInfo;
+    }
+
+    public void setMeetingInfo(String meetingInfo) {
+        this.meetingInfo = meetingInfo;
+    }
+
+    public String getMeetingLink() {
+        return meetingLink;
+    }
+
+    public void setMeetingLink(String meetingLink) {
+        this.meetingLink = meetingLink;
     }
 }
