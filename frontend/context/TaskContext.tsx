@@ -52,7 +52,8 @@ interface TaskContextType {
 
 const TaskContext = createContext<TaskContextType | undefined>(undefined);
 
-const API_URL = 'http://10.0.2.2:8080/api/tasks';
+// const API_URL = 'http://10.0.2.2:8080/api/tasks'; // Localhost for Android Emulator
+const API_URL = 'https://personal-assistant-ezyo.onrender.com/api/tasks'; // Production URL
 
 export const TaskProvider = ({ children }: { children: ReactNode }) => {
     const [tasks, setTasks] = useState<Task[]>([]);
