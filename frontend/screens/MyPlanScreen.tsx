@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, FlatList, Modal, TextInput, Platform, ScrollView, TouchableWithoutFeedback, Keyboard, Alert, Animated, Dimensions, BackHandler, AppState } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, FlatList, Modal, TextInput, Platform, ScrollView, TouchableWithoutFeedback, Keyboard, Alert, Animated, Dimensions, BackHandler, AppState, RefreshControl } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Header } from '../components/Header';
 import { TaskItem } from '../components/TaskItem';
@@ -39,7 +39,14 @@ export function MyPlanScreen({ navigation }: MyPlanScreenProps) {
     const [activeTab, setActiveTab] = useState<'Overdue' | 'Today' | 'Later'>('Today');
 
     // Context
-    const { tasks, addTask, updateTask, deleteTask: deleteTaskContext, toggleTaskCompletion } = useTaskContext();
+    const { tasks, addTask, updateTask, deleteTask: deleteTaskContext, toggleTaskCompletion, refreshTasks } = useTaskContext();
+    const [refreshing, setRefreshing] = useState(false);
+
+    const onRefresh = React.useCallback(async () => {
+        setRefreshing(true);
+        await refreshTasks();
+        setRefreshing(false);
+    }, [refreshTasks]);
 
     // Animation State
     const [renderModal, setRenderModal] = useState(false);
@@ -616,59 +623,6 @@ export function MyPlanScreen({ navigation }: MyPlanScreenProps) {
         Alert.alert("Scanned!", "Meeting details scanned. Please review and adjust extracted info.");
     };
 
-    const processScannedTextOld = (text: string) => {
-        // Simple heuristic parsing
-        const lines = text.split('\n');
-        let titleFound = "";
-        let dateFound: Date | null = null;
-        let timeFound: { start: Date, end: Date } | null = null;
-        let linkFound = "";
-        let descriptionValues: string[] = [];
-
-        // Regex patterns
-        const timePattern = /(\d{1,2})[:.](\d{2})\s*(AM|PM)?/i;
-        const urlPattern = /(https?:\/\/[^\s]+)/g;
-
-        lines.forEach(line => {
-            const trimmed = line.trim();
-            if (!trimmed) return;
-
-            // Look for URL
-            const urlMatch = trimmed.match(urlPattern);
-            if (urlMatch) {
-                linkFound = urlMatch[0];
-            }
-
-            // Look for Time (Start - End)
-            // Very basic parser, assumes first found time is start
-            if (!timeFound) {
-                const timeMatch = trimmed.match(timePattern);
-                if (timeMatch) {
-                    // This is a placeholder for complex date/time parsing logic
-                    // In a real app, use a library like 'chrono-node'
-                    // For now, we'll iterate to finding checking for dates
-                }
-            }
-
-            // Heuristic for Title: First non-date, non-link line that is reasonably long
-            if (!titleFound && trimmed.length > 5 && !trimmed.match(urlPattern) && !trimmed.match(/\d{1,2}\/\d{1,2}/)) {
-                titleFound = trimmed;
-            } else {
-                descriptionValues.push(trimmed);
-            }
-        });
-
-        // Populate Fields
-        setCreationMode('MEETING');
-        if (titleFound) setNewTaskTitle(titleFound);
-        if (linkFound) setMeetingLink(linkFound);
-
-        // Populate info with all text found
-        setMeetingInfo(text);
-
-        Alert.alert("Scanned!", "Meeting details scanned. Please review and adjust extracted info.");
-    };
-
     const categorizedTasks = useMemo(() => {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
@@ -795,6 +749,9 @@ export function MyPlanScreen({ navigation }: MyPlanScreenProps) {
                         <View style={styles.emptyState}>
                             <Text style={styles.emptyText}>No tasks for {activeTab}</Text>
                         </View>
+                    }
+                    refreshControl={
+                        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
                     }
                 />
             </View>
