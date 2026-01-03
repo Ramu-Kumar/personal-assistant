@@ -59,22 +59,41 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
     const [tasks, setTasks] = useState<Task[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
-    const fetchTasks = async () => {
-        try {
-            console.log("TaskContext: Fetching tasks...");
-            const response = await fetch(API_URL);
-            const data = await response.json();
-            const mappedTasks = data.map((t: any) => ({
-                ...t,
-                isCompleted: t.completed, // Explicitly map backend property
-                dueDate: t.dueDate ? new Date(t.dueDate) : new Date(),
-                subTasks: t.subTasks ? t.subTasks.map((st: any) => ({ ...st, id: st.id || Math.random().toString(36).substr(2, 9) })) : []
-            }));
-            setTasks(mappedTasks);
-        } catch (error) {
-            console.error('Error fetching tasks:', error);
-        } finally {
-            setIsLoading(false);
+    const fetchTasks = async (retries = 3) => {
+        setIsLoading(true);
+        for (let i = 0; i < retries; i++) {
+            try {
+                console.log(`TaskContext: Fetching tasks... (Attempt ${i + 1}/${retries})`);
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 15000); // 15s timeout for cold start
+
+                const response = await fetch(API_URL, { signal: controller.signal });
+                clearTimeout(timeoutId);
+
+                if (!response.ok) {
+                    throw new Error(`Server returned ${response.status}`);
+                }
+
+                const data = await response.json();
+                const mappedTasks = data.map((t: any) => ({
+                    ...t,
+                    isCompleted: t.completed, // Explicitly map backend property
+                    dueDate: t.dueDate ? new Date(t.dueDate) : new Date(),
+                    subTasks: t.subTasks ? t.subTasks.map((st: any) => ({ ...st, id: st.id || Math.random().toString(36).substr(2, 9) })) : []
+                }));
+                setTasks(mappedTasks);
+                setIsLoading(false);
+                return; // Success, exit loop
+            } catch (error) {
+                console.error(`Error fetching tasks (Attempt ${i + 1}):`, error);
+                if (i === retries - 1) {
+                    setIsLoading(false); // Stop loading after last failure
+                    // Optionally alert the user here if completely failed
+                } else {
+                    // Wait before retrying (backoff)
+                    await new Promise(resolve => setTimeout(() => resolve(null), 2000));
+                }
+            }
         }
     };
 
